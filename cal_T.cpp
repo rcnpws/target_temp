@@ -4,11 +4,12 @@
 //  with energy loss of beam by solving the Heat equation.
 //   
 //  Useage: 
-//  $> root -l cal_T.cpp
+//  $> make clean; make
+//  $> ./cal_T
 //
-//  Set parameters in #define...
+//  Set parameters in const double ...
 //
-//  ver. 1.0 (2020/10/19) T. Furuno
+//  ver. 1.1 (2020/10/19) T. Furuno: compile the program
 //
 ////////////////////////////////////////////////
 
