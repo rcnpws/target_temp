@@ -16,25 +16,28 @@
 #include <iostream>
 #include <cmath>
 #include <TStyle.h>
-using namespace std;
+#include <TGraph.h>
+#include <TAxis.h>
+#include <TCanvas.h>
+#include <TApplication.h>
 
-#define rmax 3.0	   // radius of target (cm)
-#define bT 300.0           // temperature at the boundary (K)
-#define dE_beam 1200.0     // energy loss throught the target (MeV)
-#define thick_target 4.46  // thickness/range of the target (g/cm2)
-#define rho 7.8            // density of the target (g/cm3)
-#define l   4.02           // thermal conductivity of the target (W/cm K)
-#define r0  0.1            // radius of the beam (cm)
-#define beam_cur 100.0     //  beam current (pnA)
+const double rmax = 3.0;	   // radius of target (cm)
+const double bT = 300.0;           // temperature at the boundary (K)
+const double dE_beam = 1200.0;     // energy loss throught the target (MeV)
+const double thick_target = 4.46;  // thickness/range of the target (g/cm2)
+const double rho = 7.8;            // density of the target (g/cm3)
+const double l = 4.02;             // thermal conductivity of the target (W/cm K)
+const double r0 = 0.1;             // radius of the beam (cm)
+const double beam_cur = 100.0;     //  beam current (pnA)
 
-#define max_T 1000         // maximum tepmerature search (K) (option)
+const double max_T = 1000;         // maximum tepmerature search (K) (option)
 
 double f2(double r,double T,double u);	// 2nd order differential of T
 
 //＝＝＝＝＝＝＝＝＝＝
 // main
 //＝＝＝＝＝＝＝＝＝＝
-cal_T(){
+int main(int argc, char **argv){
   double T;		   // temperature (K)
   double dT = 1;	   // temperature step (K)
   double u;		   // first-order differential of T
@@ -44,6 +47,8 @@ cal_T(){
   double r;		   // radius (cm)
   double dr = 0.001;	   // step of r (cm)
   
+  TApplication app("app", &argc, argv);
+
   /*** 1. find the center temperature which satisfies the boundary condition ***/
   for(fT=0.0; fT<max_T; fT+=dT ) {
     T = fT;
@@ -63,26 +68,34 @@ cal_T(){
   /*** 2. calculate the temperature distribution with the solution found in 1. ***/
   T = aT;
   u = 0;
-  float d[2000];
   std::vector<float> r_plot;
   std::vector<float> T_plot;
   int gr_cnt=0;
   for(r=0.01; r<rmax; r+=dr) {
     T += dr*u;
     u += dr*f2(r,T,u);
-    d[(int)(r*100)] = T;
     r_plot.push_back(r);
     T_plot.push_back(T);
     gr_cnt++;
   }
   
   /* 3. Draw graph */
+
   TGraph *graph = new TGraph(gr_cnt, &r_plot[0], &T_plot[0]);
   graph->SetTitle("title");
   graph->GetXaxis()->SetTitle("r (cm)");
   graph->GetYaxis()->SetTitle("T (K)");
   graph->SetLineWidth(2);
+
+  TCanvas *c1 = new TCanvas("c1", "canvas", 600, 400);
+  c1->SetGridx();
+  c1->SetGridy();
+  
   graph -> Draw("AL");
+
+  app.Run();
+
+  return 0;
 }
 
 //＝＝＝＝＝＝＝＝＝＝
